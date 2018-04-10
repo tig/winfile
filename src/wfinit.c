@@ -1448,7 +1448,7 @@ JAPANEND
 
    SetThreadPriority(hThread, THREAD_PRIORITY_NORMAL);
 
-   StartBuildingDirectoryTrie();
+   StartBuildingDirectoryTree();
 
    return TRUE;
 }
