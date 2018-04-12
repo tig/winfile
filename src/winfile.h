@@ -94,7 +94,7 @@ INT atoiW(LPWSTR sz);
 #define SIZENOMDICRAP       944
 #define MAX_TAB_COLUMNS     10
 
-#define MAXDOSFILENAMELEN   12+1            // includes the NULL
+#define MAXDOSFILENAMELEN   (12+1)            // includes the NULL
 #define MAXDOSPATHLEN       (68+MAXDOSFILENAMELEN)  // includes the NULL
 
 #define MAXLFNFILENAMELEN   260
@@ -224,13 +224,13 @@ INT atoiW(LPWSTR sz);
 #define FILE_NOTIFY_CHANGE_FLAGS (FILE_NOTIFY_CHANGE_FILE_NAME | \
    FILE_NOTIFY_CHANGE_DIR_NAME | FILE_NOTIFY_CHANGE_SIZE)
 
-#define DwordAlign(cb)      ((cb + 3) & ~3)
+#define DwordAlign(cb)      (((cb) + 3) & ~3)
 #define ISDOTDIR(x)  (x[0]==CHAR_DOT && (!x[1] || (x[1] == CHAR_DOT && !x[2])))
 #define ISUNCPATH(x) (CHAR_BACKSLASH == x[0] && CHAR_BACKSLASH == x[1])
-#define DRIVESET(str, drive) str[0] = CHAR_A + drive
+#define DRIVESET(str, drive) (str[0] = CHAR_A + (drive))
 #define COUNTOF(x) (sizeof(x)/sizeof(*x))
 #define ByteCountOf(x) ((x)*sizeof(TCHAR))
-#define abs(x) ((x < 0) ? -x : x)
+#define abs(x) (((x) < 0) ? -(x) : (x))
 
 #define DRIVEID(path) ((path[0] - CHAR_A)&31)
 
@@ -461,7 +461,7 @@ VOID   UpdateStatus(HWND hWnd);
 LPWSTR DirGetSelection(HWND hwndDir, HWND hwndView, HWND hwndLB, INT iSelType, BOOL *pfDir, PINT piLastSel);
 VOID   FillDirList(HWND hwndDir, LPXDTALINK lpStart);
 VOID   CreateLBLine(register DWORD dwLineFormat, LPXDTA lpxdta, LPTSTR szBuffer);
-INT    GetMaxExtent(HWND hwndLB, HANDLE hDTA, BOOL bNTFS);
+INT    GetMaxExtent(HWND hwndLB, LPXDTALINK lpXDTA, BOOL bNTFS);
 VOID   UpdateSelection(HWND hwndLB);
 
 INT  PutDate(LPFILETIME lpftDate, LPTSTR szStr);
@@ -918,6 +918,7 @@ BOOL  RectTreeItem(HWND hwndLB, register INT iItem, BOOL bFocusOn);
 #define IDM_HISTORYBACK     126
 #define IDM_HISTORYFWD      127
 #define IDM_STARTPOWERSHELL 128
+#define IDM_STARTBASHSHELL  129
 
 // This IDM_ is reserved for IDH_GROUP_ATTRIBS
 #define IDM_GROUP_ATTRIBS   199
@@ -1925,4 +1926,3 @@ Extern INT nCopyMaxQueue;
 #undef Extern
 #undef EQ
 
-

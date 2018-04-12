@@ -19,7 +19,9 @@
 #include <commctrl.h>
 #include <ole2.h>
 
+#ifndef HELP_PARTIALKEY
 #define HELP_PARTIALKEY 0x0105L    // call the search engine in winhelp
+#endif
 
 #define VIEW_NOCHANGE VIEW_PLUSES
 
@@ -852,6 +854,28 @@ GetPowershellExePath(LPTSTR szPSPath)
     return szPSPath[0] != TEXT('\0');
 }
 
+BOOL GetBashExePath(LPTSTR szBashPath, UINT bufSize)
+{
+	const TCHAR szBashFilename[] = TEXT("bash.exe");
+	UINT len;
+
+	len = GetSystemDirectory(szBashPath, bufSize);
+	if ((len != 0) && (len + COUNTOF(szBashFilename) + 1 < bufSize) && PathAppend(szBashPath, TEXT("bash.exe")))
+	{
+		if (PathFileExists(szBashPath))
+			return TRUE;
+	}
+
+	// If we are running 32 bit Winfile on 64 bit Windows, System32 folder is redirected to SysWow64, which
+	// doesn't include bash.exe. So we also need to check Sysnative folder, which always maps to System32 folder.
+	len = ExpandEnvironmentStrings(TEXT("%SystemRoot%\\Sysnative\\bash.exe"), szBashPath, bufSize);
+	if (len != 0 && len <= bufSize)
+	{
+		return PathFileExists(szBashPath);
+	}
+
+	return FALSE;
+}
 /*--------------------------------------------------------------------------*/
 /*                                                                          */
 /*  AppCommandProc() -                                                      */
@@ -1076,6 +1100,27 @@ AppCommandProc(register DWORD id)
            LocalFree(szDir);
        }
        break;
+
+	case IDM_STARTBASHSHELL:
+		{
+			BOOL bRunAs;
+			BOOL bDir;
+			TCHAR szToRun[MAXPATHLEN];
+			LPTSTR szDir;
+
+			szDir = GetSelection(1 | 4 | 16, &bDir);
+			if (!bDir && szDir)
+				StripFilespec(szDir);
+
+			bRunAs = GetKeyState(VK_SHIFT) < 0;
+
+			if (GetBashExePath(szToRun, COUNTOF(szToRun))) {
+				ret = ExecProgram(szToRun, NULL, szDir, FALSE, bRunAs);
+			}
+
+			LocalFree(szDir);
+		}
+		break;
 
    case IDM_SELECT:
 
@@ -2079,8 +2124,7 @@ ACPCallHelp:
        break;
 
     case IDM_ABOUT:
-       LoadString(hAppInstance, IDS_WINFILE, szTitle, COUNTOF(szTitle));
-       ShellAbout(hwndFrame, szTitle, NULL, NULL);
+       DialogBox(hAppInstance, (LPTSTR)MAKEINTRESOURCE(ABOUTDLG), hwndFrame, (DLGPROC)AboutDlgProc);
        break;
 
     case IDM_DRIVESMORE:

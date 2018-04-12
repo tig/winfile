@@ -16,9 +16,11 @@
 #include <ole2.h>
 #include <shlobj.h>
 
+#ifndef GUID_DEFINED
 DEFINE_OLEGUID(IID_IUnknown,            0x00000000L, 0, 0);
 DEFINE_OLEGUID(IID_IDropSource,             0x00000121, 0, 0);
 DEFINE_OLEGUID(IID_IDropTarget,             0x00000122, 0, 0);
+#endif
 
 HRESULT CreateDropTarget(HWND hwnd, WF_IDropTarget **ppDropTarget);
 void DropData(WF_IDropTarget *This, IDataObject *pDataObject, DWORD dwEffect);
@@ -180,8 +182,8 @@ HDROP CreateDropFiles(POINT pt, BOOL fNC, LPTSTR pszFiles)
 static HRESULT StreamToFile(IStream *stream, TCHAR *szFile)
 {
     byte buffer[BLOCK_SIZE];
-    unsigned long bytes_read;
-    int bytes_written;
+    DWORD bytes_read;
+    DWORD bytes_written;
     HRESULT hr;
 	HANDLE hFile;
 
